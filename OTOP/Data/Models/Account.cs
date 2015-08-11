@@ -2,21 +2,25 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.CompilerServices;
-using Authenticator.Properties;
 using Authenticator.Utils;
 
 namespace Authenticator.Data.Models
 {
 	public class Account : INotifyPropertyChanged
 	{
-		private int _digits;
-		private string _email;
-		private Algorithm _hmacAlgorithm;
-		private int _id;
-		private string _issuer;
-		private string _originalUri;
-		private int _period;
-		private string _sharedSecret;
+	    #region Fields
+
+	    private int _digits;
+	    private string _email;
+	    private Algorithm _hmacAlgorithm;
+	    private int _id;
+	    private string _issuer;
+	    private string _originalUri;
+	    private int _period;
+	    private string _sharedSecret;
+
+	    #endregion
+
 
 		public Account()
 		{
@@ -32,7 +36,7 @@ namespace Authenticator.Data.Models
 			set
 			{
 				_id = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(Id));
 			}
 		}
 
@@ -43,7 +47,7 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _email) return;
 				_email = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(Email));
 			}
 		}
 
@@ -54,7 +58,7 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _issuer) return;
 				_issuer = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(Issuer));
 			}
 		}
 
@@ -65,7 +69,7 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _originalUri) return;
 				_originalUri = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(OriginalUri));
 			}
 		}
 
@@ -77,8 +81,8 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _sharedSecret) return;
 				_sharedSecret = value;
-				OnPropertyChanged();
-				OnPropertyChanged("AuthCode");
+				OnPropertyChanged(nameof(SharedSecret));
+				OnPropertyChanged(nameof(AuthCode));
 			}
 		}
 
@@ -89,7 +93,7 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _period) return;
 				_period = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(Period));
 			}
 		}
 
@@ -100,7 +104,7 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _digits) return;
 				_digits = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(Digits));
 			}
 		}
 
@@ -111,7 +115,7 @@ namespace Authenticator.Data.Models
 			{
 				if (value == _hmacAlgorithm) return;
 				_hmacAlgorithm = value;
-				OnPropertyChanged();
+				OnPropertyChanged(nameof(HMACAlgorithm));
 			}
 		}
 
@@ -121,18 +125,23 @@ namespace Authenticator.Data.Models
 		[NotMapped]
 		public int TimeLeft => Period - (TOTP.UnixTime()%Period);
 
-		public event PropertyChangedEventHandler PropertyChanged;
-
 		public void UpdateCode()
 		{
-			OnPropertyChanged("AuthCode");
-			OnPropertyChanged("TimeLeft");
+			OnPropertyChanged(nameof(AuthCode));
+			OnPropertyChanged(nameof(TimeLeft));
 		}
 
-		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-		{
-			PropertyChangedEventHandler handler = PropertyChanged;
-			handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-		}
+	    #region INPC
+
+	    public event PropertyChangedEventHandler PropertyChanged;
+
+	    protected virtual void OnPropertyChanged(string propertyName = null)
+	    {
+	        PropertyChangedEventHandler handler = PropertyChanged;
+	        handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+	    }
+
+	    #endregion
+
 	}
 }

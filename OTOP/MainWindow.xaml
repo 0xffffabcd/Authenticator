@@ -6,6 +6,7 @@
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:data="clr-namespace:Authenticator.Data"
                       xmlns:models="clr-namespace:Authenticator.Data.Models"
+                      xmlns:dialogs="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
                       mc:Ignorable="d"
                       Title="Authenticator" Height="492" Width="357"
                       ShowMaxRestoreButton="False"
@@ -18,78 +19,89 @@
                       RightWindowCommandsOverlayBehavior="Never"
                       Icon="Resources/icon.ico"
                       SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display">
-	<controls:MetroWindow.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/blue.xaml" />
-				<ResourceDictionary Source="/Resources/Icons.xaml" />
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
-	</controls:MetroWindow.Resources>
-	<controls:MetroWindow.RightWindowCommands>
-		<controls:WindowCommands>
-			<Button Click="AddAccountFromUrl">
-				Import Account
-			</Button>
-			<Button Click="OpenNewAccountFlyout">
-				Add account
-			</Button>
-		</controls:WindowCommands>
-	</controls:MetroWindow.RightWindowCommands>
-	<controls:MetroWindow.Flyouts>
-		<controls:FlyoutsControl>
-			<controls:Flyout Header="New account" Position="Right" Width="270" Theme="Inverse">
-				<Grid>
-					<TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Issuer" VerticalAlignment="Top" />
-					<TextBox x:Name="IssuerTextBox" Height="23" Margin="10,31,10,0" TextWrapping="Wrap" VerticalAlignment="Top" />
-					<TextBlock HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="Label" VerticalAlignment="Top" />
-					<TextBox x:Name="LabelTextBox" Height="23" Margin="10,83,10,0" TextWrapping="Wrap" VerticalAlignment="Top" />
-					<TextBlock HorizontalAlignment="Left" Margin="10,114,0,0" TextWrapping="Wrap" Text="Shared secret"
-					           VerticalAlignment="Top" />
-					<TextBox x:Name="SharedSecretTextBox" Height="23" Margin="10,135,10,0" TextWrapping="Wrap" VerticalAlignment="Top" />
-					<TextBlock HorizontalAlignment="Left" Margin="10,166,0,0" TextWrapping="Wrap" Text="Period"
-					           VerticalAlignment="Top" />
-					<controls:NumericUpDown x:Name="PeriodNumericUpDown" Height="23" Margin="10,187,10,0" VerticalAlignment="Top"
-					                        Value="30" Minimum="0" Maximum="180" TextAlignment="Justify" />
-					<TextBlock HorizontalAlignment="Left" Margin="10,218,0,0" TextWrapping="Wrap" Text="Digits"
-					           VerticalAlignment="Top" />
-					<controls:NumericUpDown x:Name="DigitsNumericUpDown" Height="23" Margin="10,239,10,0" VerticalAlignment="Top"
-					                        TextAlignment="Justify" Minimum="6" Maximum="8" Value="6" />
-					<TextBlock HorizontalAlignment="Left" Margin="14,270,0,0" TextWrapping="Wrap" Text="Algorithm"
-					           VerticalAlignment="Top" />
-					<ComboBox x:Name="AlgorithmComboBox" Margin="10,291,10,0" VerticalAlignment="Top" SelectedIndex="0">
-						<ComboBoxItem Content="SHA1" />
-						<ComboBoxItem Content="SHA256" />
-						<ComboBoxItem Content="SHA512" />
-						<ComboBoxItem Content="MD5" />
-					</ComboBox>
-					<Button Content="Add account" Margin="0,375,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="88"
-					        Click="AddAccountButton_OnClick" />
-					<Button Content="Cancel" Margin="0,375,106,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"
-					        Click="CloseFlyer" />
-				</Grid>
-			</controls:Flyout>
-		</controls:FlyoutsControl>
-	</controls:MetroWindow.Flyouts>
-	<Grid>
-		<ListBox x:Name="AccountsListBox" Margin="10" BorderThickness="1" BorderBrush="#FFA6A6A6"
-		         MouseDoubleClick="CopyToClipboardListBoxClick">
-			<ListBox.ContextMenu>
-				<ContextMenu>
-					<MenuItem Header="Remove" Click="RemoveItem" />
-				</ContextMenu>
-			</ListBox.ContextMenu>
-			<ListBox.ItemTemplate>
-				<DataTemplate DataType="models:Account">
-					<StackPanel>
-						<TextBlock Text="{Binding Path=Email}" Padding="2" />
-						<TextBlock Text="{Binding Path=AuthCode}" FontWeight="Bold" FontSize="24" Padding="2" />
-						<controls:MetroProgressBar Margin="5,5,5,5" VerticalAlignment="Top" Height="3"
-						                           Maximum="{Binding Path=Period}" Value="{Binding Path=TimeLeft,Mode=OneWay}"
-						                           Foreground="{DynamicResource AccentColorBrush}" />
-					</StackPanel>
-				</DataTemplate>
-			</ListBox.ItemTemplate>
-		</ListBox>
-	</Grid>
+    <controls:MetroWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/blue.xaml" />
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+        
+    </controls:MetroWindow.Resources>
+    <controls:MetroWindow.RightWindowCommands>
+        <controls:WindowCommands>
+            <Button Click="AddAccountFromUrl">
+                Import Account
+            </Button>
+            <Button Click="OpenNewAccountFlyout">
+                Add account
+            </Button>
+        </controls:WindowCommands>
+    </controls:MetroWindow.RightWindowCommands>
+    <controls:MetroWindow.Flyouts>
+        <controls:FlyoutsControl>
+            <controls:Flyout Header="New account" Position="Right" Width="270" Theme="Inverse" ClosingFinished="FlyoutClosingReset">
+                <Grid>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="Issuer" VerticalAlignment="Top" />
+                    <TextBox x:Name="IssuerTextBox" Height="23" Margin="10,31,10,0" TextWrapping="Wrap" VerticalAlignment="Top" />
+                    <TextBlock HorizontalAlignment="Left" Margin="10,62,0,0" TextWrapping="Wrap" Text="Label" VerticalAlignment="Top" />
+                    <TextBox x:Name="LabelTextBox" Height="23" Margin="10,83,10,0" TextWrapping="Wrap" VerticalAlignment="Top" />
+                    <TextBlock HorizontalAlignment="Left" Margin="10,114,0,0" TextWrapping="Wrap" Text="Shared secret"
+                               VerticalAlignment="Top" />
+                    <TextBox x:Name="SharedSecretTextBox" Height="23" Margin="10,135,10,0" TextWrapping="Wrap" VerticalAlignment="Top" />
+                    <TextBlock HorizontalAlignment="Left" Margin="10,166,0,0" TextWrapping="Wrap" Text="Period"
+                               VerticalAlignment="Top" />
+                    <controls:NumericUpDown x:Name="PeriodNumericUpDown" Height="23" Margin="10,187,10,0" VerticalAlignment="Top"
+                                            Value="30" Minimum="0" Maximum="180" TextAlignment="Justify" />
+                    <TextBlock HorizontalAlignment="Left" Margin="10,218,0,0" TextWrapping="Wrap" Text="Digits"
+                               VerticalAlignment="Top" />
+                    <controls:NumericUpDown x:Name="DigitsNumericUpDown" Height="23" Margin="10,239,10,0" VerticalAlignment="Top"
+                                            TextAlignment="Justify" Minimum="6" Maximum="8" Value="6" />
+                    <TextBlock HorizontalAlignment="Left" Margin="14,270,0,0" TextWrapping="Wrap" Text="Algorithm"
+                               VerticalAlignment="Top" />
+                    <ComboBox x:Name="AlgorithmComboBox" Margin="10,291,10,0" VerticalAlignment="Top" SelectedIndex="0">
+                        <ComboBoxItem Content="SHA1" />
+                        <ComboBoxItem Content="SHA256" />
+                        <ComboBoxItem Content="SHA512" />
+                        <ComboBoxItem Content="MD5" />
+                    </ComboBox>
+                    <Button Content="Add account" Margin="0,375,10,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="88"
+                            Click="AddAccountButton_OnClick" />
+                    <Button Content="Cancel" Margin="0,375,106,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"
+                            Click="CloseFlyer" />
+                </Grid>
+            </controls:Flyout>
+        </controls:FlyoutsControl>
+    </controls:MetroWindow.Flyouts>
+    <Grid>
+        <ListBox x:Name="AccountsListBox" Margin="10" BorderThickness="1" BorderBrush="#FFA6A6A6"
+                 MouseDoubleClick="CopyToClipboardListBoxClick">
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="QR Code" Click="QRCodeItem" />
+                    <Separator/>
+                    <MenuItem Header="Remove" Click="RemoveItem" />
+                    
+                </ContextMenu>
+            </ListBox.ContextMenu>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="models:Account">
+                    <StackPanel>
+                        <TextBlock Padding="2" >
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0}: {1}">
+                                    <Binding Path="Issuer"></Binding>
+                                    <Binding Path="Email"></Binding>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock Text="{Binding Path=AuthCode}" FontWeight="Bold" FontSize="24" Padding="2" />
+                        <controls:MetroProgressBar Margin="5,5,5,5" VerticalAlignment="Top" Height="3"
+                                                   Maximum="{Binding Path=Period}" Value="{Binding Path=TimeLeft,Mode=OneWay}"
+                                                   Foreground="{DynamicResource AccentColorBrush}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
 </controls:MetroWindow>
